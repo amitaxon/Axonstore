@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Success</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f8f8;
+    }
+
+    h1 {
+      color: green;
+    }
+
+    .summary {
+      margin-bottom: 30px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .product-item {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      flex: 1 1 250px;
+      max-width: 250px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .product-item img {
+      width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+
+    .product-item h3 {
+      margin: 5px 0;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .product-item p {
+      margin: 2px 0;
+      font-size: 14px;
+    }
+
+    .buttons {
+      margin-top: 30px;
+    }
+
+    .buttons button,
+    .buttons a {
+      padding: 10px 20px;
+      margin-right: 10px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+    }
+
+    .buttons button:hover,
+    .buttons a:hover {
+      background-color: #218838;
+    }
+
+    .order-meta {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>✅ Order Placed Successfully!</h1>
+
+  <div class="summary">
+    <p><strong>Order ID:</strong> <span id="orderId"></span></p>
+    <p><strong>Date:</strong> <span id="orderDate"></span></p>
+    <p><strong>Name:</strong> <span id="name"></span></p>
+    <p><strong>Email:</strong> <span id="email"></span></p>
+    <p><strong>Address:</strong> <span id="address"></span></p>
+    <p><strong>Payment Method:</strong> <span id="payment"></span></p>
+    <p><strong>Total Paid:</strong> Rs. <span id="total"></span></p>
+  </div>
+
+  <h2>🛍 Products You Bought:</h2>
+  <div class="product-list" id="productList"></div>
+
+  <div class="buttons">
+    <button onclick="window.print()">🖨️ Print Receipt</button>
+    <a href="index.html">🏪 Continue Shopping</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const total = params.get("total");
+
+    const name = localStorage.getItem("lastCustomerName") || "Unknown";
+    const email = localStorage.getItem("lastCustomerEmail") || "N/A";
+    const address = localStorage.getItem("lastCustomerAddress") || "N/A";
+    const payment = localStorage.getItem("lastCustomerPayment") || "N/A";
+    const cartItems = JSON.parse(localStorage.getItem("lastCart")) || [];
+
+    const orderId = 'AXON' + Date.now();
+    const orderDate = new Date().toLocaleString();
+
+    document.getElementById("orderId").textContent = orderId;
+    document.getElementById("orderDate").textContent = orderDate;
+    document.getElementById("name").textContent = name;
+    document.getElementById("email").textContent = email;
+    document.getElementById("address").textContent = address;
+    document.getElementById("payment").textContent = payment;
+    document.getElementById("total").textContent = total;
+
+    const productList = document.getElementById("productList");
+
+    if (cartItems.length === 0) {
+      productList.innerHTML = "<p>No products found.</p>";
+    } else {
+      productList.innerHTML = cartItems.map(item => `
+        <div class="product-item">
+          <img src="${item.image}" alt="${item.title}" />
+          <h3>${item.title}</h3>
+          <p>Price: Rs. ${parseFloat(item.price).toFixed(2)}</p>
+          <p>Quantity: ${item.quantity}</p>
+          <p>Total: Rs. ${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+        </div>
+      `).join('');
+    }
+
+    // Save to orderHistory
+    const order = {
+      orderId,
+      date: orderDate,
+      name,
+      email,
+      address,
+      payment,
+      total,
+      items: cartItems
+    };
+
+    const history = JSON.parse(localStorage.getItem("orderHistory")) || [];
+    history.push(order);
+    localStorage.setItem("orderHistory", JSON.stringify(history));
+
+    // Clean up after success
+    setTimeout(() => {
+      localStorage.removeItem("lastCustomerName");
+      localStorage.removeItem("lastCustomerEmail");
+      localStorage.removeItem("lastCustomerAddress");
+      localStorage.removeItem("lastCustomerPayment");
+      localStorage.removeItem("lastCart");
+    }, 5000);
+  </script>
+</body>
+</html>

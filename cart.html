@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AXON - Cart & Wishlist</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+</head>
+<body>
+  <header class="header">
+    <h1 class="logo">AXON</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart & Wishlist</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="cart-section">
+      <h2>Cart</h2>
+      <div id="cartItems">Loading cart...</div>
+    </section>
+
+    <section class="wishlist-section">
+      <h2>Wishlist</h2>
+      <div id="wishlistItems">Loading wishlist...</div>
+    </section>
+  </main>
+
+  
+  <script>
+    // Load cart items from localStorage and display
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartContainer = document.getElementById("cartItems");
+      if (!cartContainer) return;
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+        return;
+      }
+
+      cartContainer.innerHTML = "";
+      cart.forEach((p, i) => {
+        cartContainer.innerHTML += `
+          <div class="cart-item">
+            <img src="${p.image}" alt="${p.name}" style="width:80px;" />
+            <h4>${p.name}</h4>
+            <p><strong>Rs. ${p.price}</strong></p>
+            <button onclick="removeFromCart(${i})">Remove</button>
+          </div>
+        `;
+      });
+    }
+
+    // Remove item from cart
+    function removeFromCart(index) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    // Load wishlist items from localStorage and display
+    function loadWishlist() {
+      const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      const wishlistContainer = document.getElementById("wishlistItems");
+      if (!wishlistContainer) return;
+
+      if (wishlist.length === 0) {
+        wishlistContainer.innerHTML = "<p>Your wishlist is empty.</p>";
+        return;
+      }
+
+      wishlistContainer.innerHTML = "";
+      wishlist.forEach((p, i) => {
+        wishlistContainer.innerHTML += `
+          <div class="wishlist-item">
+            <img src="${p.image}" alt="${p.name}" style="width:80px;" />
+            <h4>${p.name}</h4>
+            <p><strong>Rs. ${p.price}</strong></p>
+            <button onclick="removeFromWishlist(${i})">Remove</button>
+          </div>
+        `;
+      });
+    }
+
+    // Remove item from wishlist
+    function removeFromWishlist(index) {
+      let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      wishlist.splice(index, 1);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      loadWishlist();
+    }
+
+    // Load both lists on page load
+    window.onload = () => {
+      loadCart();
+      loadWishlist();
+    };
+  </script>
+</body>
+</html>

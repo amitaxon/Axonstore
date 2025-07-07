@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AXON | Product Listing</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    .header {
+      background: #000;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .menu-icon {
+      cursor: pointer;
+    }
+    .profile-icon{
+        color:white;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #111;
+      color: #fff;
+      padding: 20px;
+      transition: left 0.3s ease;
+      z-index: 999;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar .close-icon {
+      font-size: 24px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+    }
+
+    .sidebar ul li {
+      margin: 15px 0;
+    }
+
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .search-container {
+      width:100%;
+      display: flex;
+      justify-content: center;
+      padding: 15px;
+      background: #fff;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .search-container button {
+      width:15%;
+      padding: 10px;
+      margin-left: 5px;
+      background: #000;
+      color: #fff;
+      border: 1px solid black;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #productList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .product-card {
+      background: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .product-title {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .product-price {
+      margin-top: 4px;
+      color: #333;
+    }
+
+    .stock-status {
+      font-size: 14px;
+      margin-top: 4px;
+      color: green;
+    }
+
+    .stock-out {
+      color: red;
+    }
+
+    .footer {
+      background: white;
+      color: black;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+
+    .footer a {
+      color: black;
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .search-container input {
+        width: 60%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <i class="material-icons menu-icon" onclick="toggleSidebar()">menu</i>
+    <div class="logo">AXON</div>
+    <a href="profile.html"><i class="material-icons profile-icon">account_circle</i></a>  
+    </header>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <i class="material-icons close-icon" onclick="toggleSidebar()">close</i>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="cart.html">Cart</a></li>
+      <li><a href="wishlist.html">Wishlist</a></li>
+      <li><a href="admin.html">Admin</a></li>
+    </ul>
+  </div>
+
+  <!-- Search -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search products..." oninput="renderProducts()">
+    <button><i class="material-icons">search</i></button>
+  </div>
+
+  <!-- Product List -->
+  <div id="productList"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <a href="index.html"><i class="material-icons">home</i></a>
+    <a href="message.html"><i class="material-icons">message</i></a>
+    <a href="cart.html"><i class="material-icons">shopping_cart</i></a>
+    <a href="profile.html"><i class="material-icons">account_circle</i></a>
+  </footer>
+
+  <!-- Script -->
+  <script>
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+    }
+
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const productList = document.getElementById('productList');
+
+    function renderProducts() {
+      const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+      productList.innerHTML = '';
+
+      const filtered = products.filter(p =>
+        p.title.toLowerCase().includes(searchQuery) ||
+        (p.description && p.description.toLowerCase().includes(searchQuery))
+      );
+
+      if (filtered.length === 0) {
+        productList.innerHTML = '<p style="text-align:center;">No products found.</p>';
+        return;
+      }
+
+      filtered.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => {
+          window.location.href = `product.html?id=${product.id}`;
+        };
+
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.title}">
+          <div class="product-title">${product.title}</div>
+          <div class="product-price">₹${parseFloat(product.price).toFixed(2)}</div>
+          <div class="stock-status ${product.stock > 0 ? '' : 'stock-out'}">
+            ${product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+          </div>
+        `;
+
+        productList.appendChild(card);
+      });
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>

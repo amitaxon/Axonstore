@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f7f7f7;">
+
+  <h1 style="text-align: center;">Checkout</h1>
+
+  <!-- Cart Section -->
+  <section class="checkout-section" style="margin: 20px 0;">
+    <h2>Cart</h2>
+    <ul id="cartItems" style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px;"></ul>
+    <p><strong>Total: Rs. <span id="totalPrice">0</span></strong></p>
+  </section>
+
+  <!-- Shipping Info -->
+  <section class="checkout-section" style="margin: 20px 0;">
+    <h2>Shipping Information</h2>
+    <form id="checkoutForm" style="display: flex; flex-direction: column; gap: 10px;">
+      <input type="text" id="name" placeholder="Full Name" required 
+        style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;" />
+      <input type="email" id="email" placeholder="Email Address" required 
+        style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;" />
+      <input type="text" id="address" placeholder="Shipping Address" required 
+        style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;" />
+  </section>
+
+  <!-- Payment Method -->
+  <section class="checkout-section" style="margin: 20px 0;">
+    <h2>💳 Payment Method</h2>
+    <select id="paymentMethod" required 
+      style="padding: 10px; border-radius: 5px; border: 1px solid #ccc;">
+      <option value="">-- Select Payment --</option>
+      <option value="cod">Cash on Delivery</option>
+      <option value="card">Credit/Debit Card</option>
+      <option value="esewa">eSewa</option>
+    </select>
+  </section>
+
+  <!-- Submit Button -->
+  <section class="checkout-section" style="margin: 20px 0;">
+    <button type="submit" style="padding: 12px; background-color: #28a745; color: white; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;">
+      ✅ Place Order
+    </button>
+  </section>
+  </form>
+
+  <script>
+    const buyNowProduct = JSON.parse(localStorage.getItem("buyNowProduct"));
+    let cartItems = buyNowProduct ? [buyNowProduct] : JSON.parse(localStorage.getItem("cart")) || [];
+    const cartList = document.getElementById("cartItems");
+    const totalPriceSpan = document.getElementById("totalPrice");
+
+    function updateTotal() {
+      let total = 0;
+      cartItems.forEach(item => {
+        total += parseFloat(item.price) * item.quantity;
+      });
+      totalPriceSpan.textContent = total.toFixed(2);
+    }
+
+    function renderCartItems() {
+      cartList.innerHTML = '';
+      cartItems.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.setAttribute("style", `
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background: #fafafa;
+        `);
+
+        li.innerHTML = `
+          <img src="${item.image}" alt="${item.title}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px;">
+          <div style="flex: 1;">
+            <strong style="font-size: 16px;">${item.title}</strong><br>
+            <span>Price: Rs. ${parseFloat(item.price).toFixed(2)}</span><br>
+            <label for="qty-${index}">Quantity:</label>
+            <input type="number" id="qty-${index}" value="${item.quantity}" min="1" style="width: 60px; padding: 5px; margin-top: 5px;">
+          </div>
+        `;
+
+        // Quantity change handler
+        const input = li.querySelector(`#qty-${index}`);
+        input.addEventListener("input", (e) => {
+          let newQty = parseInt(e.target.value);
+          if (isNaN(newQty) || newQty < 1) newQty = 1;
+          cartItems[index].quantity = newQty;
+          updateTotal();
+        });
+
+        cartList.appendChild(li);
+      });
+
+      updateTotal();
+    }
+
+    renderCartItems();
+
+    document.getElementById("checkoutForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const address = document.getElementById("address").value;
+      const payment = document.getElementById("paymentMethod").value;
+
+      if (!payment) {
+        alert("Please select a payment method.");
+        return;
+      }
+
+      localStorage.setItem("lastCustomerName", name);
+      localStorage.setItem("lastCustomerEmail", email);
+      localStorage.setItem("lastCustomerAddress", address);
+      localStorage.setItem("lastCustomerPayment", payment);
+      localStorage.setItem("lastCart", JSON.stringify(cartItems));
+
+      // Clear only relevant data
+      if (buyNowProduct) {
+        localStorage.removeItem("buyNowProduct");
+      } else {
+        localStorage.removeItem("cart");
+      }
+
+      window.location.href = `success.html?total=${totalPriceSpan.textContent}`;
+    });
+  </script>
+</body>
+</html>

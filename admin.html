@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AXON Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #111;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 30px auto;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .tabs button:hover,
+    .tabs button.active {
+      background: #333;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    form#productForm, .order-card, .dashboard-box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    #productForm input, #productForm select, #productForm button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #productList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .product-card h3 {
+      margin: 5px 0;
+    }
+
+    .product-card p {
+      font-size: 14px;
+      margin: 2px 0;
+    }
+
+    .product-card button {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .order-card {
+      margin-bottom: 20px;
+      border-left: 4px solid #111;
+    }
+
+    .order-products {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .order-product {
+      background: #eee;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .order-product img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+
+    .cancel-btn {
+      margin-top: 10px;
+      background: #c0392b;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dashboard-box {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: #111;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      flex: 1 1 200px;
+      text-align: center;
+    }
+
+    .logout-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #111;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>AXON Admin Panel</h1>
+
+<div class="tabs">
+  <button class="tabBtn active" onclick="showTab('products')"><span class="material-icons">inventory_2</span> Products</button>
+  <button class="tabBtn" onclick="showTab('orders')"><span class="material-icons">receipt_long</span> Orders</button>
+  <button class="tabBtn" onclick="showTab('dashboard')"><span class="material-icons">bar_chart</span> Dashboard</button>
+</div>
+
+<!-- PRODUCTS SECTION -->
+<div class="section active" id="products">
+  <form id="productForm">
+    <input type="text" id="title" placeholder="Product Name" required />
+    <input type="number" id="price" placeholder="Price (Rs)" required />
+    <input type="number" id="stock" placeholder="Stock" required />
+    <select id="available">
+      <option value="instock">Available</option>
+      <option value="out of stock">Not Available</option>
+    </select>
+    <input type="file" id="image" accept="image/*" required />
+    <button type="submit">Publish Product</button>
+  </form>
+  <div id="productList"></div>
+</div>
+
+<!-- ORDERS SECTION -->
+<div class="section" id="orders">
+  <div id="orderList"></div>
+</div>
+
+<!-- DASHBOARD SECTION -->
+<div class="section" id="dashboard">
+  <div class="dashboard-box">
+    <div class="stat-card">
+      <h3>Total Orders</h3>
+      <p id="totalOrders">0</p>
+    </div>
+    <div class="stat-card">
+      <h3>Total Revenue</h3>
+      <p>Rs. <span id="totalRevenue">0</span></p>
+    </div>
+    <div class="stat-card">
+      <h3>Products Listed</h3>
+      <p id="totalProducts">0</p>
+    </div>
+  </div>
+</div>
+
+<button class="logout-btn" onclick="logout()"><span class="material-icons">logout</span> Logout</button>
+
+<script>
+  const user = JSON.parse(localStorage.getItem("loggedInUser"));
+  if (!user || user.username !== "admin") {
+    alert("Unauthorized! Redirecting...");
+    window.location.href = "login.html";
+  }
+
+  function showTab(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+    document.querySelectorAll('.tabBtn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function logout() {
+    localStorage.removeItem("loggedInUser");
+    window.location.href = "login.html";
+  }
+
+  const form = document.getElementById("productForm");
+  const productList = document.getElementById("productList");
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const title = document.getElementById("title").value;
+    const price = parseFloat(document.getElementById("price").value);
+    const stock = parseInt(document.getElementById("stock").value);
+    const available = document.getElementById("available").value;
+    const imageInput = document.getElementById("image");
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const newProduct = {
+        id: Date.now(),
+        title,
+        price,
+        stock,
+        available,
+        image: reader.result
+      };
+
+      const products = JSON.parse(localStorage.getItem("products")) || [];
+      products.push(newProduct);
+      localStorage.setItem("products", JSON.stringify(products));
+      form.reset();
+      loadProducts();
+      updateDashboard();
+    };
+    reader.readAsDataURL(imageInput.files[0]);
+  });
+
+  function loadProducts() {
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+    productList.innerHTML = products.map(p => `
+      <div class="product-card">
+        <img src="${p.image}" alt="${p.title}" />
+        <h3>${p.title}</h3>
+        <p>Rs. ${p.price}</p>
+        <p>Stock: ${p.stock}</p>
+        <button onclick="deleteProduct(${p.id})"><span class="material-icons">delete</span> Delete</button>
+      </div>
+    `).join('');
+  }
+
+  function deleteProduct(id) {
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    products = products.filter(p => p.id !== id);
+    localStorage.setItem("products", JSON.stringify(products));
+    loadProducts();
+    updateDashboard();
+  }
+
+  function loadOrders() {
+    const orders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+    const orderList = document.getElementById("orderList");
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+
+    if (orders.length === 0) {
+      orderList.innerHTML = "<p>No orders yet.</p>";
+      return;
+    }
+
+    orderList.innerHTML = orders.map((o, i) => `
+      <div class="order-card">
+        <p><strong><span class="material-icons">person</span> Customer:</strong> ${o.name}</p>
+        <p><strong><span class="material-icons">contact_phone</span> Contact:</strong> ${o.contact || "N/A"}</p>
+        <p><strong><span class="material-icons">home</span> Address:</strong> ${o.address || "N/A"}</p>
+        <p><strong><span class="material-icons">payments</span> Payment:</strong> ${o.payment}</p>
+        <p><strong><span class="material-icons">shopping_cart</span> Total:</strong> Rs. ${o.total}</p>
+        <div class="order-products">
+          ${o.items.map(item => {
+            const prod = products.find(p => p.title === item.title);
+            return `
+              <div class="order-product">
+                <img src="${prod?.image || ''}" alt="${item.title}" />
+                <div>
+                  <div><strong>${item.title}</strong></div>
+                  <div>Qty: ${item.quantity}</div>
+                  <div>Rs. ${prod?.price || 'N/A'}</div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <button class="cancel-btn" onclick="cancelOrder(${i})"><span class="material-icons">cancel</span> Cancel Order</button>
+      </div>
+    `).join('');
+  }
+
+  function cancelOrder(index) {
+    const orders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+    if (confirm("Cancel this order?")) {
+      orders.splice(index, 1);
+      localStorage.setItem("orderHistory", JSON.stringify(orders));
+      loadOrders();
+      updateDashboard();
+    }
+  }
+
+  function updateDashboard() {
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+    const orders = JSON.parse(localStorage.getItem("orderHistory")) || [];
+
+    document.getElementById("totalProducts").textContent = products.length;
+    document.getElementById("totalOrders").textContent = orders.length;
+
+    const revenue = orders.reduce((sum, o) => sum + parseFloat(o.total), 0);
+    document.getElementById("totalRevenue").textContent = revenue.toFixed(2);
+  }
+
+  // INIT
+  loadProducts();
+  loadOrders();
+  updateDashboard();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - AXON</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 40px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #888;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .login-container .main-login {
+      background: black;
+      color: white;
+    }
+
+    .login-container .main-login:hover {
+      background: #155bc0;
+    }
+
+    .google-login {
+      background: white;
+      color: #444;
+      border: 1px solid #ccc;
+      font-weight: bold;
+    }
+
+    .google-login .material-icons,
+    .main-login .material-icons {
+      font-size: 20px;
+    }
+
+    .login-container p {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .login-container a {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+
+    .login-container a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="text" id="loginUsername" placeholder="Username or Email">
+    <div class="password-wrapper">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <span class="material-icons toggle-password" onclick="togglePassword()">visibility_off</span>
+    </div>
+
+    <button class="main-login" onclick="login()">
+      <span class="material-icons">login</span>
+      Login
+    </button>
+
+    <p>New user? <a href="signin.html">Sign up here</a></p>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById("loginPassword");
+      const icon = document.querySelector(".toggle-password");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.textContent = "visibility";
+      } else {
+        passwordInput.type = "password";
+        icon.textContent = "visibility_off";
+      }
+    }
+
+    function login() {
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (username === "" || password === "") {
+        alert("Please enter both username and password.");
+        return;
+      }
+
+      // Admin login
+      if (username === "admin" && password === "amitad6211") {
+        localStorage.setItem("loggedInUser", JSON.stringify({ username: "admin" }));
+        window.location.href = "admin.html";
+        return;
+      }
+
+      // Default user login
+      const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+      const matchedUser = storedUsers.find(user =>
+        (user.username === username || user.email === username || user.phone === username) &&
+        user.password === password
+      );
+
+      // For hardcoded user1/1234 if not registered
+      if (username === "user1" && password === "1234") {
+        localStorage.setItem("loggedInUser", JSON.stringify({ username: "user1" }));
+        window.location.href = "index.html";
+        return;
+      }
+
+      if (matchedUser) {
+        localStorage.setItem("loggedInUser", JSON.stringify(matchedUser));
+        window.location.href = "index.html";
+      } else {
+        alert("Invalid username or password");
+      }
+    }
+  </script>
+</body>
+</html>
